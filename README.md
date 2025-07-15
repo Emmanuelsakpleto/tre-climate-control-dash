@@ -1,73 +1,74 @@
-# Welcome to your Lovable project
+# TRE Climate Control Dashboard
 
-## Project info
+Un tableau de bord moderne pour le contrôle et la surveillance des systèmes climatiques.
 
-**URL**: https://lovable.dev/projects/7fbdc61a-b2ab-4a6f-b5b5-3494e8162444
+## Fonctionnalités
 
-## How can I edit this code?
+- **Surveillance en temps réel** : Affichage des statuts système, température, humidité et pression
+- **Contrôle intelligent** : Panneau de contrôle avec modes automatique et manuel
+- **Alertes de fuite** : Système d'alerte pour détecter les fuites dans le système
+- **Graphiques de performance** : Visualisation des données de performance avec graphiques interactifs
+- **Historique des événements** : Table d'historique pour suivre les événements système
 
-There are several ways of editing your application.
+## Installation
 
-**Use Lovable**
+Clonez le repository et installez les dépendances :
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/7fbdc61a-b2ab-4a6f-b5b5-3494e8162444) and start prompting.
+```bash
+git clone https://github.com/Emmanuelsakpleto/tre-climate-control-dash.git
+cd tre-climate-control-dash
+npm install
+```
 
-Changes made via Lovable will be committed automatically to this repo.
+## Développement
 
-**Use your preferred IDE**
+Pour lancer le serveur de développement :
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+L'application sera disponible à l'adresse `http://localhost:5173`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Technologies utilisées
 
-**Use GitHub Codespaces**
+Ce projet utilise les technologies suivantes :
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- **Vite** : Outil de build rapide pour le développement
+- **TypeScript** : Langage de programmation typé
+- **React** : Bibliothèque JavaScript pour les interfaces utilisateur
+- **shadcn/ui** : Composants UI modernes et accessibles
+- **Tailwind CSS** : Framework CSS utilitaire
+- **React Query** : Gestion d'état et cache pour les requêtes
+- **Recharts** : Bibliothèque de graphiques pour React
 
-## What technologies are used for this project?
+## Structure du projet
 
-This project is built with:
+```
+src/
+├── components/        # Composants réutilisables
+│   ├── ui/           # Composants UI de base
+│   ├── Dashboard.jsx # Composant principal du tableau de bord
+│   ├── StatusCard.jsx # Cartes de statut
+│   ├── LeakAlert.jsx # Alertes de fuite
+│   └── ...
+├── data/             # Données mockées
+├── hooks/            # Hooks React personnalisés
+├── lib/              # Utilitaires
+└── pages/            # Pages de l'application
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Scripts disponibles
 
-## How can I deploy this project?
+- `npm run dev` : Lance le serveur de développement
+- `npm run build` : Compile l'application pour la production
+- `npm run preview` : Prévisualise la version de production
+- `npm run lint` : Vérifie le code avec ESLint
 
-Simply open [Lovable](https://lovable.dev/projects/7fbdc61a-b2ab-4a6f-b5b5-3494e8162444) and click on Share -> Publish.
+## Contribution
 
-## Can I connect a custom domain to my Lovable project?
+Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou à soumettre une pull request.
 
-Yes, you can!
+## Licence
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Ce projet est sous licence MIT.
