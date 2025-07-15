@@ -32,41 +32,74 @@ const ControlPanel = ({ currentMode, onModeChange }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Contrôle Manuel</h2>
+    <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+        <span className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-600 rounded-full flex items-center justify-center text-white text-sm">
+          🎛️
+        </span>
+        Contrôle Manuel
+      </h2>
       
-      <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-        <div className="text-sm text-gray-600 mb-1">Mode actuel:</div>
-        <div className="text-lg font-semibold text-gray-800">{currentMode}</div>
+      {/* Mode actuel avec indicateur visuel */}
+      <div className="mb-6 p-5 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-sm text-gray-600 mb-1 font-medium">Mode actuel:</div>
+            <div className="text-xl font-bold text-gray-800 flex items-center gap-2">
+              {currentMode}
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+          <div className="text-4xl opacity-60">
+            {modes.find(m => m.label.includes(currentMode.split(' ')[0]))?.icon || '⚙️'}
+          </div>
+        </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {modes.map((mode) => (
+      {/* Sélection des modes avec animations */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        {modes.map((mode, index) => (
           <button
             key={mode.id}
             onClick={() => handleModeSelection(mode.id)}
-            className={`${mode.color} text-white p-4 rounded-lg transition-colors flex items-center justify-center space-x-2`}
+            className={`${mode.color} text-white p-5 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl transform hover:scale-105 group`}
+            style={{ animationDelay: `${index * 100}ms` }}
           >
-            <span className="text-2xl">{mode.icon}</span>
-            <span className="font-medium">{mode.label}</span>
+            <span className="text-3xl group-hover:scale-110 transition-transform duration-300">{mode.icon}</span>
+            <div className="text-left">
+              <div className="font-bold text-lg">{mode.label}</div>
+              <div className="text-xs opacity-80">
+                {mode.id === 'auto' ? 'Gestion intelligente' : 
+                 mode.id === 'solaire' ? 'Énergie renouvelable' :
+                 mode.id === 'compression' ? 'Performance optimale' : 'Efficacité mixte'}
+              </div>
+            </div>
           </button>
         ))}
       </div>
       
-      <div className="border-t pt-4">
-        <h3 className="font-semibold text-gray-800 mb-3">Actions Rapides</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <button className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded transition-colors">
-            🔄 Redémarrer Système
+      {/* Actions rapides avec amélioration UX */}
+      <div className="border-t-2 border-gray-100 pt-6">
+        <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <span className="text-lg">⚡</span>
+          Actions Rapides
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <button className="group bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105">
+            <span className="text-lg group-hover:rotate-180 transition-transform duration-300">🔄</span>
+            <span className="font-medium">Redémarrer</span>
           </button>
-          <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition-colors">
-            🛑 Arrêt d'Urgence
+          <button className="group bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105">
+            <span className="text-lg group-hover:animate-pulse">🛑</span>
+            <span className="font-medium">Arrêt d'Urgence</span>
           </button>
-          <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition-colors">
-            🔧 Mode Maintenance
+          <button className="group bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-4 py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105">
+            <span className="text-lg group-hover:rotate-12 transition-transform duration-300">🔧</span>
+            <span className="font-medium">Maintenance</span>
           </button>
-          <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition-colors">
-            📊 Diagnostic
+          <button className="group bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105">
+            <span className="text-lg group-hover:scale-110 transition-transform duration-300">📊</span>
+            <span className="font-medium">Diagnostic</span>
           </button>
         </div>
       </div>
