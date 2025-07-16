@@ -65,10 +65,3 @@ src/
 - `npm run preview` : Prévisualise la version de production
 - `npm run lint` : Vérifie le code avec ESLint
 
-## Contribution
-
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou à soumettre une pull request.
-
-## Licence
-
-Ce projet est sous licence MIT.

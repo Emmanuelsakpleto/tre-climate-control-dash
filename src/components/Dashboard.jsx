@@ -4,7 +4,9 @@ import LeakAlert from './LeakAlert';
 import PerformanceChart from './PerformanceChart';
 import ControlPanel from './ControlPanel';
 import HistoryTable from './HistoryTable';
-import { systemStatus, leakAlerts, performanceData, historyEvents, updateSystemStatus } from '../data/mockData';
+import ConnectionStatus from './ConnectionStatus';
+import useClimatisation, { useLeakDetection } from '../hooks/useClimatisation';
+import { systemStatus, performanceData, historyEvents } from '../data/mockData';
 
 /**
  * Composant Dashboard - Interface principale du tableau de bord
@@ -12,25 +14,38 @@ import { systemStatus, leakAlerts, performanceData, historyEvents, updateSystemS
  */
 const Dashboard = () => {
   const [activeSection, setActiveSection] = useState('status');
-  const [currentStatus, setCurrentStatus] = useState(systemStatus);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // Utilisation des hooks personnalisés
+  const { 
+    systemStatus: liveSystemStatus, 
+    isLoading, 
+    error, 
+    isConnected, 
+    lastUpdate,
+    controlMode,
+    refreshData 
+  } = useClimatisation();
+  
+  const { alerts, generateAlert, resolveAlert } = useLeakDetection();
 
-  // Simulation de mise à jour des données en temps réel
+  // Utiliser les données live ou les données mock en fallback
+  const currentStatus = liveSystemStatus || systemStatus;
+
+  // Générer des alertes basées sur les données du système
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentStatus(updateSystemStatus());
-    }, 30000); // Mise à jour toutes les 30 secondes
+    if (liveSystemStatus && liveSystemStatus.leak_detected) {
+      generateAlert(liveSystemStatus);
+    }
+  }, [liveSystemStatus, generateAlert]);
 
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleModeChange = (newMode) => {
-    setCurrentStatus(prev => ({
-      ...prev,
-      mode: newMode === 'auto' ? 'Automatique' : 
-            newMode === 'solaire' ? 'Solaire Adsorption' :
-            newMode === 'compression' ? 'Compression' : 'Hybride'
-    }));
+  const handleModeChange = async (newMode) => {
+    try {
+      await controlMode(newMode);
+      console.log(`Mode changé vers: ${newMode}`);
+    } catch (err) {
+      console.error('Erreur lors du changement de mode:', err);
+    }
   };
 
   const menuItems = [
@@ -46,7 +61,7 @@ const Dashboard = () => {
       case 'status':
         return <StatusCard status={currentStatus} />;
       case 'alerts':
-        return <LeakAlert alerts={leakAlerts} />;
+        return <LeakAlert alerts={alerts} onResolve={resolveAlert} />;
       case 'performance':
         return <PerformanceChart data={performanceData} />;
       case 'controls':
@@ -75,10 +90,22 @@ const Dashboard = () => {
             </h1>
           </div>
           <div className="flex items-center space-x-4">
+            <ConnectionStatus 
+              isConnected={isConnected}
+              isLoading={isLoading}
+              arduinoConnected={currentStatus.arduino_connected}
+              lastUpdate={lastUpdate}
+            />
             <div className="text-sm text-gray-600">
               Site K1 | {new Date().toLocaleString('fr-FR')}
             </div>
-            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <button 
+              onClick={refreshData}
+              className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
+              title="Actualiser les données"
+            >
+              🔄
+            </button>
           </div>
         </div>
       </header>
