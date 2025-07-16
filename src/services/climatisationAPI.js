@@ -40,7 +40,7 @@ export const climatisationAPI = {
    * Récupère l'état actuel du système
    */
   getSystemStatus: async () => {
-    return await apiRequest('/system-status');
+    return await apiRequest('/status');
   },
 
   /**
@@ -51,7 +51,7 @@ export const climatisationAPI = {
       ? { action: 'auto' }
       : { mode, action: 'set' };
       
-    return await apiRequest('/control', {
+    return await apiRequest('/mode', {
       method: 'POST',
       body: JSON.stringify(requestBody),
     });
@@ -62,7 +62,7 @@ export const climatisationAPI = {
    */
   healthCheck: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/system-status`);
+      const response = await fetch(`${API_BASE_URL}/status`);
       return response.ok;
     } catch {
       return false;
@@ -107,13 +107,14 @@ export const dataTransformers = {
    */
   transformModeToBackend: (frontendMode) => {
     const modeMap = {
-      'solaire': 'Solaire',
-      'compression': 'Compression',
-      'hybride': 'Hybride',
-      'auto': 'auto'
+      'solaire': 'solar',
+      'compression': 'compression',
+      'hybride': 'hybrid',
+      'auto': 'automatic',
+      'automatique': 'automatic'
     };
     
-    return modeMap[frontendMode] || frontendMode;
+    return modeMap[frontendMode.toLowerCase()] || frontendMode.toLowerCase();
   }
 };
 
