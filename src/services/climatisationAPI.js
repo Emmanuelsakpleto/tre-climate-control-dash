@@ -47,9 +47,13 @@ export const climatisationAPI = {
    * Contrôle manuel du mode de fonctionnement
    */
   controlMode: async (mode) => {
+    const requestBody = mode === 'auto' 
+      ? { action: 'auto' }
+      : { mode, action: 'set' };
+      
     return await apiRequest('/control', {
       method: 'POST',
-      body: JSON.stringify({ mode }),
+      body: JSON.stringify(requestBody),
     });
   },
 
@@ -74,9 +78,15 @@ export const dataTransformers = {
    * Transforme les données du backend vers le format frontend
    */
   transformSystemStatus: (backendData) => {
+    const modeMap = {
+      'Solaire': 'Solaire Adsorption',
+      'Compression': 'Compression',
+      'Hybride': 'Hybride',
+      'Automatique': 'Automatique'
+    };
+    
     return {
-      mode: backendData.mode === 'Solaire' ? 'Solaire Adsorption' : 
-            backendData.mode === 'Compression' ? 'Compression' : 'Hybride',
+      mode: modeMap[backendData.mode] || backendData.mode,
       ensoleillement: Math.round(backendData.ensoleillement || 0),
       temperature: Math.round(backendData.temperature || 0),
       demande_froid: Math.round((backendData.debit || 0) * 0.24), // Estimation
@@ -87,7 +97,8 @@ export const dataTransformers = {
       arduino_connected: backendData.arduino_connected || false,
       thermal_image: backendData.thermal_image || null,
       leak_detected: backendData.leak_detected || false,
-      leak_details: backendData.leak_details || {}
+      leak_details: backendData.leak_details || {},
+      mode_forced: backendData.mode_forced || false
     };
   },
 
@@ -95,15 +106,14 @@ export const dataTransformers = {
    * Transforme le mode frontend vers le format backend
    */
   transformModeToBackend: (frontendMode) => {
-    switch (frontendMode) {
-      case 'solaire':
-        return 'Solaire';
-      case 'compression':
-        return 'Compression';
-      case 'auto':
-      default:
-        return 'Compression'; // Fallback
-    }
+    const modeMap = {
+      'solaire': 'Solaire',
+      'compression': 'Compression',
+      'hybride': 'Hybride',
+      'auto': 'auto'
+    };
+    
+    return modeMap[frontendMode] || frontendMode;
   }
 };
 

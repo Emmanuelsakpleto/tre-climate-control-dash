@@ -1,67 +1,258 @@
-# TRE Climate Control Dashboard
+# 🎨 Frontend - Tableau de bord Climatisation Hybride
 
-Un tableau de bord moderne pour le contrôle et la surveillance des systèmes climatiques.
+Interface utilisateur moderne pour le contrôle et la surveillance du système de climatisation hybride.
 
-## Fonctionnalités
-
-- **Surveillance en temps réel** : Affichage des statuts système, température, humidité et pression
-- **Contrôle intelligent** : Panneau de contrôle avec modes automatique et manuel
-- **Alertes de fuite** : Système d'alerte pour détecter les fuites dans le système
-- **Graphiques de performance** : Visualisation des données de performance avec graphiques interactifs
-- **Historique des événements** : Table d'historique pour suivre les événements système
-
-## Installation
-
-Clonez le repository et installez les dépendances :
+## 🚀 Démarrage rapide
 
 ```bash
-git clone https://github.com/Emmanuelsakpleto/tre-climate-control-dash.git
-cd tre-climate-control-dash
+# Installation
 npm install
-```
 
-## Développement
-
-Pour lancer le serveur de développement :
-
-```bash
+# Développement
 npm run dev
+
+# Build production
+npm run build
+
+# Prévisualisation
+npm run preview
 ```
 
-L'application sera disponible à l'adresse `http://localhost:5173`.
+## 🎯 Fonctionnalités
 
-## Technologies utilisées
+### 📊 Dashboard principal
+- **État système** : Visualisation temps réel
+- **Métriques** : Température, pression, débit, etc.
+- **Mode actuel** : Solaire, Compression, Hybride, Auto
 
-Ce projet utilise les technologies suivantes :
+### 🎛️ Contrôles
+- **Basculement modes** : Interface intuitive
+- **Confirmation** : Prévention erreurs
+- **Actions rapides** : Redémarrage, maintenance
 
-- **Vite** : Outil de build rapide pour le développement
-- **TypeScript** : Langage de programmation typé
-- **React** : Bibliothèque JavaScript pour les interfaces utilisateur
-- **shadcn/ui** : Composants UI modernes et accessibles
-- **Tailwind CSS** : Framework CSS utilitaire
-- **React Query** : Gestion d'état et cache pour les requêtes
-- **Recharts** : Bibliothèque de graphiques pour React
+### ⚠️ Alertes
+- **Détection fuites** : Notifications temps réel
+- **Géolocalisation** : Localisation précise
+- **Historique** : Suivi des incidents
 
-## Structure du projet
+### 📈 Performances
+- **Graphiques** : Visualisation données
+- **Historique** : Tendances temporelles
+- **Statistiques** : Analyse performance
+
+## 🏗️ Architecture
 
 ```
-src/
-├── components/        # Composants réutilisables
-│   ├── ui/           # Composants UI de base
-│   ├── Dashboard.jsx # Composant principal du tableau de bord
-│   ├── StatusCard.jsx # Cartes de statut
-│   ├── LeakAlert.jsx # Alertes de fuite
-│   └── ...
-├── data/             # Données mockées
-├── hooks/            # Hooks React personnalisés
-├── lib/              # Utilitaires
-└── pages/            # Pages de l'application
+📦 src/
+├── 📂 components/
+│   ├── 📄 Dashboard.jsx          # Interface principale
+│   ├── 📄 StatusCard.jsx         # Cartes d'état
+│   ├── 📄 ControlPanel.jsx       # Panneau de contrôle
+│   ├── 📄 LeakAlert.jsx          # Alertes de fuite
+│   ├── 📄 PerformanceChart.jsx   # Graphiques
+│   ├── 📄 HistoryTable.jsx       # Tableau historique
+│   ├── 📄 ConnectionStatus.jsx   # Statut connexion
+│   └── 📂 ui/                    # Composants UI de base
+├── 📂 hooks/
+│   ├── 📄 useClimatisation.js    # Hook principal
+│   └── 📄 use-toast.ts           # Notifications
+├── 📂 services/
+│   └── 📄 climatisationAPI.js    # Client API
+├── 📂 data/
+│   └── 📄 mockData.js            # Données de test
+├── 📂 lib/
+│   └── 📄 utils.ts               # Utilitaires
+└── 📂 pages/
+    ├── 📄 Index.tsx              # Page d'accueil
+    └── 📄 NotFound.tsx           # Page 404
 ```
 
-## Scripts disponibles
+## 🎨 Technologies
 
-- `npm run dev` : Lance le serveur de développement
-- `npm run build` : Compile l'application pour la production
-- `npm run preview` : Prévisualise la version de production
-- `npm run lint` : Vérifie le code avec ESLint
+- **⚡ Vite** : Build rapide et moderne
+- **⚛️ React** : Bibliothèque UI
+- **🎯 TypeScript** : Typage statique
+- **🎨 Tailwind CSS** : Framework CSS
+- **🧩 shadcn/ui** : Composants UI
+- **📊 Recharts** : Graphiques
+- **🔗 React Router** : Navigation
+
+## 🔧 Configuration
+
+### 🌐 API Backend
+```javascript
+// src/services/climatisationAPI.js
+const API_BASE_URL = 'http://127.0.0.1:5000/api';
+```
+
+### 🎨 Thème
+```javascript
+// tailwind.config.ts
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        // Couleurs personnalisées
+      }
+    }
+  }
+}
+```
+
+## 🛠️ Développement
+
+### 📝 Scripts disponibles
+- `npm run dev` : Serveur de développement
+- `npm run build` : Build production
+- `npm run preview` : Prévisualisation build
+- `npm run lint` : Vérification code
+
+### 🔄 Hot reload
+Le serveur de développement supporte le hot reload pour une expérience fluide.
+
+### 🧪 Tests
+```bash
+npm test
+```
+
+## 📱 Responsive Design
+
+L'interface s'adapte à tous les écrans :
+- **📱 Mobile** : Interface tactile optimisée
+- **📱 Tablette** : Disposition adaptée
+- **💻 Desktop** : Expérience complète
+
+## 🎯 Composants principaux
+
+### 🖥️ Dashboard
+```jsx
+<Dashboard />
+```
+Interface principale avec navigation et contenu dynamique.
+
+### 📊 StatusCard
+```jsx
+<StatusCard status={systemStatus} />
+```
+Affiche l'état du système avec métriques temps réel.
+
+### 🎛️ ControlPanel
+```jsx
+<ControlPanel 
+  currentMode={mode} 
+  onModeChange={handleModeChange} 
+/>
+```
+Contrôles pour basculer entre modes.
+
+### ⚠️ LeakAlert
+```jsx
+<LeakAlert 
+  alerts={alerts} 
+  onResolve={handleResolve} 
+/>
+```
+Affichage des alertes de fuite.
+
+## 🔌 Intégration API
+
+### 🌐 Hook personnalisé
+```javascript
+const { 
+  systemStatus, 
+  isLoading, 
+  error, 
+  controlMode 
+} = useClimatisation();
+```
+
+### 📡 Appels API
+```javascript
+// Récupérer l'état
+const status = await climatisationAPI.getSystemStatus();
+
+// Contrôler le mode
+await climatisationAPI.controlMode('Solaire');
+```
+
+## 🎨 Personnalisation
+
+### 🎨 Couleurs
+```css
+/* Mode solaire */
+.solaire { @apply text-yellow-700 bg-yellow-50; }
+
+/* Mode compression */
+.compression { @apply text-blue-700 bg-blue-50; }
+
+/* Mode hybride */
+.hybride { @apply text-purple-700 bg-purple-50; }
+```
+
+### 🖼️ Icônes
+```jsx
+const getModeIcon = (mode) => {
+  if (mode.includes('Solaire')) return '☀️';
+  if (mode.includes('Compression')) return '❄️';
+  if (mode.includes('Hybride')) return '⚡';
+  return '🤖';
+};
+```
+
+## 🚀 Déploiement
+
+### 📦 Build
+```bash
+npm run build
+```
+
+### 🌐 Serveur statique
+```bash
+npx serve dist
+```
+
+### 🐳 Docker
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+EXPOSE 5173
+CMD ["npm", "run", "preview"]
+```
+
+## 🔧 Maintenance
+
+### 📊 Monitoring
+- Performance avec Lighthouse
+- Erreurs JavaScript
+- Temps de chargement
+
+### 🔄 Mises à jour
+```bash
+# Dépendances
+npm update
+
+# Audit sécurité
+npm audit fix
+```
+
+## 🤝 Contribution
+
+1. Respecter les conventions de nommage
+2. Utiliser TypeScript pour nouveaux composants
+3. Tester sur différents navigateurs
+4. Optimiser les performances
+
+## 📚 Documentation
+
+- **📖 Storybook** : Composants isolés
+- **🎓 Guide style** : Conventions UI
+- **🔧 API Frontend** : Hooks et services
+
+---
+
+**🎨 Interface moderne et intuitive pour un contrôle optimal du système de climatisation ! 🎨**
 
