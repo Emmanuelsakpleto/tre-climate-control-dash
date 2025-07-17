@@ -26,6 +26,16 @@ const ConnectionStatus = ({ isConnected, isLoading, arduinoConnected, lastUpdate
     return <Wifi className="w-4 h-4" />;
   };
 
+  // Conversion sécurisée de la date
+  let dateObj = null;
+  if (lastUpdate) {
+    try {
+      dateObj = new Date(lastUpdate);
+    } catch {
+      dateObj = null;
+    }
+  }
+
   return (
     <div className="flex items-center space-x-2 text-sm">
       <div className={`w-3 h-3 rounded-full ${getStatusColor()} ${isConnected ? 'animate-pulse' : ''}`}></div>
@@ -34,8 +44,8 @@ const ConnectionStatus = ({ isConnected, isLoading, arduinoConnected, lastUpdate
         <span className="text-gray-600">{getStatusText()}</span>
       </div>
       {lastUpdate && (
-        <span className="text-gray-500 text-xs">
-          • Dernière MAJ: {lastUpdate.toLocaleTimeString('fr-FR')}
+        <span className="text-sm text-gray-600">
+          Dernière mise à jour : {dateObj ? dateObj.toLocaleTimeString('fr-FR') : '--'}
         </span>
       )}
     </div>

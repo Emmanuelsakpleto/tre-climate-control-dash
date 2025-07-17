@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import StatusCard from './StatusCard';
-import LeakAlert from './LeakAlert';
 import PerformanceChart from './PerformanceChart';
 import ControlPanel from './ControlPanel';
 import HistoryTable from './HistoryTable';
 import ConnectionStatus from './ConnectionStatus';
-import useClimatisation, { useLeakDetection } from '../hooks/useClimatisation';
 import { systemStatus, performanceData, historyEvents } from '../data/mockData';
 
 /**
@@ -17,34 +15,32 @@ const Dashboard = () => {
   
   const [activeSection, setActiveSection] = useState('status');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
-  // Utilisation des hooks personnalisés
-  const { 
-    systemStatus: liveSystemStatus, 
-    isLoading, 
-    error, 
-    isConnected, 
-    lastUpdate,
-    controlMode,
-    refreshData 
-  } = useClimatisation();
-  
-  const { alerts, generateAlert, resolveAlert } = useLeakDetection();
+  const [apiStatus, setApiStatus] = useState(null);
+  const [loadingApi, setLoadingApi] = useState(false);
+  const [apiError, setApiError] = useState(null);
 
-  // Utiliser les données live ou les données mock en fallback
-  // TEMPORAIRE: Forcer l'utilisation des données mock pour test
-  const currentStatus = systemStatus; // liveSystemStatus || systemStatus;
-  
+  // Récupérer les données du backend à l'initialisation
+  useEffect(() => {
+    setLoadingApi(true);
+    fetch('http://127.0.0.1:5000/api/status')
+      .then(res => res.json())
+      .then(data => {
+        setApiStatus(data);
+        setLoadingApi(false);
+      })
+      .catch(err => {
+        setApiError(err);
+        setLoadingApi(false);
+      });
+  }, []);
+
+  // Utiliser les données du backend si dispo, sinon mock
+  const currentStatus = apiStatus || systemStatus;
+
   // Debug - Vérifier les données passées
+  console.log('🔍 Dashboard - Données API systemStatus:', apiStatus);
   console.log('🔍 Dashboard - Données mock systemStatus:', systemStatus);
   console.log('🔍 Dashboard - Données currentStatus utilisées:', currentStatus);
-
-  // Générer des alertes basées sur les données du système
-  useEffect(() => {
-    if (liveSystemStatus && liveSystemStatus.leak_detected) {
-      generateAlert(liveSystemStatus);
-    }
-  }, [liveSystemStatus, generateAlert]);
 
   const handleModeChange = async (newMode) => {
     try {
@@ -57,7 +53,6 @@ const Dashboard = () => {
 
   const menuItems = [
     { id: 'status', label: 'État', icon: '📊' },
-    { id: 'alerts', label: 'Alertes', icon: '⚠️' },
     { id: 'performance', label: 'Performances', icon: '📈' },
     { id: 'controls', label: 'Contrôles', icon: '🎛️' },
     { id: 'history', label: 'Historique', icon: '📋' }
@@ -70,8 +65,6 @@ const Dashboard = () => {
       case 'status':
         console.log('🎯 Dashboard - Rendu StatusCard avec data:', currentStatus);
         return <StatusCard status={currentStatus} />;
-      case 'alerts':
-        return <LeakAlert alerts={alerts} onResolve={resolveAlert} />;
       case 'performance':
         return <PerformanceChart data={performanceData} />;
       case 'controls':
@@ -102,21 +95,13 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center space-x-4">
             <ConnectionStatus 
-              isConnected={isConnected}
-              isLoading={isLoading}
+              isLoading={loadingApi}
               arduinoConnected={currentStatus.arduino_connected}
-              lastUpdate={lastUpdate}
+              lastUpdate={currentStatus.derniere_maj || currentStatus.timestamp}
             />
             <div className="text-sm text-gray-600">
               Site K1 | {new Date().toLocaleString('fr-FR')}
             </div>
-            <button 
-              onClick={refreshData}
-              className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
-              title="Actualiser les données"
-            >
-              🔄
-            </button>
           </div>
         </div>
       </header>

@@ -22,13 +22,13 @@ const PerformanceChart = ({ data = [] }) => {
       data.push({
         date: date.toISOString().split('T')[0],
         dateLabel: date.toLocaleDateString('fr-FR', { 
-          day: '2-digit', 
-          month: '2-digit' 
+          day: 'numeric', 
+          month: 'short' 
         }),
         temperature: Math.round((baseTemp + Math.random() * 2 - 1) * 10) / 10,
         humidity: Math.round((baseHumidity + Math.random() * 5 - 2.5) * 10) / 10,
         ensoleillement: Math.round((baseEnsoleillement + Math.random() * 100 - 50) * 10) / 10,
-        pression: Math.round((1013.25 + Math.random() * 10 - 5) * 100) / 100,
+        pression: Math.round((2.0 + Math.random() * 0.8 - 0.4) * 100) / 100, // En bar
         debit: Math.round((50 + Math.random() * 10 - 5) * 10) / 10,
         niveau_eau: Math.round((80 + Math.random() * 10 - 5) * 10) / 10,
         efficacite: Math.round((85 + Math.random() * 15 - 7.5) * 10) / 10,
@@ -43,8 +43,14 @@ const PerformanceChart = ({ data = [] }) => {
     let processedData = [];
     
     if (data && data.length > 0) {
-      // Utiliser les vraies données si disponibles
-      processedData = data;
+      // Utiliser les vraies données si disponibles et ajouter dateLabel
+      processedData = data.map(item => ({
+        ...item,
+        dateLabel: new Date(item.date).toLocaleDateString('fr-FR', { 
+          day: 'numeric', 
+          month: 'short' 
+        })
+      }));
     } else {
       // Générer des données de test
       const days = timeRange === '7jours' ? 7 : 30;
@@ -63,7 +69,7 @@ const PerformanceChart = ({ data = [] }) => {
       temperature: '°C',
       humidity: '%',
       ensoleillement: 'W/m²',
-      pression: 'hPa',
+      pression: 'bar',
       debit: 'L/min',
       niveau_eau: '%',
       efficacite: '%',
@@ -153,12 +159,16 @@ const PerformanceChart = ({ data = [] }) => {
         
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={filteredData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <LineChart data={filteredData} margin={{ top: 5, right: 30, left: 20, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
                 dataKey="dateLabel" 
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 11 }}
                 tickMargin={10}
+                angle={-45}
+                textAnchor="end"
+                height={60}
+                interval={timeRange === '7jours' ? 0 : 'preserveStartEnd'}
               />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip 
@@ -177,7 +187,7 @@ const PerformanceChart = ({ data = [] }) => {
                 stroke="#ef4444" 
                 strokeWidth={2}
                 name="Température"
-                dot={{ fill: '#ef4444', strokeWidth: 2, r: 4 }}
+                dot={{ fill: '#ef4444', strokeWidth: 2, r: 3 }}
               />
               <Line 
                 type="monotone" 
@@ -185,7 +195,7 @@ const PerformanceChart = ({ data = [] }) => {
                 stroke="#3b82f6" 
                 strokeWidth={2}
                 name="Humidité"
-                dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+                dot={{ fill: '#3b82f6', strokeWidth: 2, r: 3 }}
               />
               <Line 
                 type="monotone" 
@@ -193,7 +203,7 @@ const PerformanceChart = ({ data = [] }) => {
                 stroke="#f59e0b" 
                 strokeWidth={2}
                 name="Ensoleillement"
-                dot={{ fill: '#f59e0b', strokeWidth: 2, r: 4 }}
+                dot={{ fill: '#f59e0b', strokeWidth: 2, r: 3 }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -206,12 +216,16 @@ const PerformanceChart = ({ data = [] }) => {
         
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={filteredData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <LineChart data={filteredData} margin={{ top: 5, right: 30, left: 20, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
                 dataKey="dateLabel" 
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 11 }}
                 tickMargin={10}
+                angle={-45}
+                textAnchor="end"
+                height={60}
+                interval={timeRange === '7jours' ? 0 : 'preserveStartEnd'}
               />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip 
@@ -230,7 +244,7 @@ const PerformanceChart = ({ data = [] }) => {
                 stroke="#06b6d4" 
                 strokeWidth={2}
                 name="Débit"
-                dot={{ fill: '#06b6d4', strokeWidth: 2, r: 4 }}
+                dot={{ fill: '#06b6d4', strokeWidth: 2, r: 3 }}
               />
               <Line 
                 type="monotone" 
@@ -238,7 +252,7 @@ const PerformanceChart = ({ data = [] }) => {
                 stroke="#8b5cf6" 
                 strokeWidth={2}
                 name="Niveau d'eau"
-                dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 4 }}
+                dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 3 }}
               />
               <Line 
                 type="monotone" 
@@ -246,7 +260,7 @@ const PerformanceChart = ({ data = [] }) => {
                 stroke="#10b981" 
                 strokeWidth={2}
                 name="Pression"
-                dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
+                dot={{ fill: '#10b981', strokeWidth: 2, r: 3 }}
               />
             </LineChart>
           </ResponsiveContainer>
