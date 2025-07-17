@@ -13,6 +13,8 @@ import { systemStatus, performanceData, historyEvents } from '../data/mockData';
  * Gère la navigation, l'état global et l'affichage des composants
  */
 const Dashboard = () => {
+  console.log('🚀 Dashboard - Composant rendu !');
+  
   const [activeSection, setActiveSection] = useState('status');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
@@ -30,7 +32,12 @@ const Dashboard = () => {
   const { alerts, generateAlert, resolveAlert } = useLeakDetection();
 
   // Utiliser les données live ou les données mock en fallback
-  const currentStatus = liveSystemStatus || systemStatus;
+  // TEMPORAIRE: Forcer l'utilisation des données mock pour test
+  const currentStatus = systemStatus; // liveSystemStatus || systemStatus;
+  
+  // Debug - Vérifier les données passées
+  console.log('🔍 Dashboard - Données mock systemStatus:', systemStatus);
+  console.log('🔍 Dashboard - Données currentStatus utilisées:', currentStatus);
 
   // Générer des alertes basées sur les données du système
   useEffect(() => {
@@ -57,8 +64,11 @@ const Dashboard = () => {
   ];
 
   const renderContent = () => {
+    console.log('🔍 Dashboard - renderContent appelé, activeSection:', activeSection);
+    
     switch (activeSection) {
       case 'status':
+        console.log('🎯 Dashboard - Rendu StatusCard avec data:', currentStatus);
         return <StatusCard status={currentStatus} />;
       case 'alerts':
         return <LeakAlert alerts={alerts} onResolve={resolveAlert} />;
@@ -69,6 +79,7 @@ const Dashboard = () => {
       case 'history':
         return <HistoryTable events={historyEvents} />;
       default:
+        console.log('🎯 Dashboard - Rendu StatusCard par défaut avec data:', currentStatus);
         return <StatusCard status={currentStatus} />;
     }
   };

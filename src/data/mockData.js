@@ -5,10 +5,13 @@ export const systemStatus = {
   mode: "Solaire Adsorption",
   ensoleillement: 800, // W/m²
   temperature: 24, // °C
+  humidity: 65, // %
   demande_froid: 12, // kW
   debit: 50, // L/min
   pression: 2.5, // bars
   niveau_eau: 80, // %
+  status: 'online',
+  leak_detected: false,
   derniere_maj: "2025-07-14 14:30:00"
 };
 
