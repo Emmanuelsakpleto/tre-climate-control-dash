@@ -2,17 +2,22 @@
 // Simule les données en temps réel du système de climatisation de l'amphithéâtre 2
 
 export const systemStatus = {
-  mode: "Solaire Adsorption",
-  ensoleillement: 800, // W/m²
-  temperature: 24, // °C
-  humidity: 65, // %
-  demande_froid: 12, // kW
-  debit: 50, // L/min
-  pression: 2.5, // bars
-  niveau_eau: 80, // %
+  mode: 'Solaire Adsorption',
   status: 'online',
   leak_detected: false,
-  derniere_maj: "2025-07-14 14:30:00"
+  // 5 potentiomètres Arduino → 5 métriques directes
+  temperature: 24.0,       // Potentiomètre A4
+  pression: 2.25,          // Potentiomètre A1 (en bar)
+  ensoleillement: 800,     // Potentiomètre A3
+  debit: 50,              // Potentiomètre A0
+  niveau_eau: 80,         // Potentiomètre A2
+  // Métrique calculée par le backend
+  humidity: 65,           // Calculée basée sur température, ensoleillement, niveau_eau
+  derniere_maj: new Date().toISOString(),
+  // Données calculées par le système
+  demande_froid: 12,
+  cop: 4.2,
+  consommation_electrique: 1.8
 };
 
 export const leakAlerts = [
@@ -31,7 +36,7 @@ export const leakAlerts = [
     localisation: "Pompe principale",
     horodatage: "2025-07-14 08:15",
     gravite: "Moyenne",
-    image_thermique: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmZjk5MDAiLz48L3N2Zz4=",
+    image_thermique: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmZjk5MDAiLz48L3N2Zz4=",
     status: "resolved"
   },
   {
@@ -40,42 +45,99 @@ export const leakAlerts = [
     localisation: "Réservoir principal",
     horodatage: "2025-07-13 16:45",
     gravite: "Faible",
-    image_thermique: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmZmZmMDAiLz48L3N2Zz4=",
+    image_thermique: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmZmZmMDAiLz48L3N2Zz4=",
     status: "resolved"
   }
 ];
 
 export const performanceData = [
-  { date: "2025-07-14", mode: "Solaire", energie_kwh: 50, cop: 0.8, debit: 50, pression: 2.5, niveau_eau: 80 },
-  { date: "2025-07-13", mode: "Compression", energie_kwh: 120, cop: 3.2, debit: 55, pression: 2.3, niveau_eau: 75 },
-  { date: "2025-07-12", mode: "Solaire", energie_kwh: 45, cop: 0.9, debit: 48, pression: 2.4, niveau_eau: 82 },
-  { date: "2025-07-11", mode: "Hybride", energie_kwh: 85, cop: 2.1, debit: 52, pression: 2.6, niveau_eau: 78 },
-  { date: "2025-07-10", mode: "Compression", energie_kwh: 135, cop: 3.0, debit: 58, pression: 2.2, niveau_eau: 73 },
-  { date: "2025-07-09", mode: "Solaire", energie_kwh: 42, cop: 0.7, debit: 46, pression: 2.5, niveau_eau: 85 },
-  { date: "2025-07-08", mode: "Hybride", energie_kwh: 90, cop: 2.3, debit: 54, pression: 2.4, niveau_eau: 76 }
+  // Données sur 30 jours avec les 5 métriques des potentiomètres Arduino + humidité calculée
+  ...Array.from({ length: 30 }, (_, i) => {
+    const temperature = 22 + Math.sin(i * 0.1) * 3 + Math.random() * 2 - 1;
+    const ensoleillement = 800 + Math.sin(i * 0.2) * 200 + Math.random() * 100 - 50;
+    const niveau_eau = 80 + Math.random() * 10 - 5;
+    const pression = 2.0 + Math.random() * 0.8 - 0.4; // En bar
+    
+    // Calcul intelligent de l'humidité
+    const calculateHumidity = (temp, sun, water) => {
+      const base_humidity = 65;
+      const temp_factor = (30 - temp) * 2;  // Plus chaud = moins humide
+      const sun_factor = (sun / 1000) * -10; // Plus de soleil = moins humide
+      const water_factor = (water - 50) * 0.3; // Plus d'eau = plus humide
+      
+      const humidity = base_humidity + temp_factor + sun_factor + water_factor;
+      return Math.max(20, Math.min(90, humidity)); // Limiter entre 20% et 90%
+    };
+    
+    return {
+      date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      temperature: temperature,
+      humidity: calculateHumidity(temperature, ensoleillement, niveau_eau),
+      pression: pression,
+      ensoleillement: ensoleillement,
+      debit: 50 + Math.random() * 10 - 5,
+      niveau_eau: niveau_eau,
+      efficacite: 85 + Math.random() * 15 - 7.5,
+      consommation: 1.2 + Math.random() * 0.6 - 0.3,
+      cop: 4.2 + Math.random() * 0.8 - 0.4
+    };
+  })
 ];
 
 export const historyEvents = [
-  { date: "2025-07-14 14:30", mode: "Solaire Adsorption", energie_kwh: 12.5, anomalies: "Aucune" },
-  { date: "2025-07-14 10:00", mode: "Solaire Adsorption", energie_kwh: 8.2, anomalies: "Fuite vanne 3" },
-  { date: "2025-07-14 08:15", mode: "Compression", energie_kwh: 15.8, anomalies: "Pression anormale" },
-  { date: "2025-07-13 16:45", mode: "Hybride", energie_kwh: 18.3, anomalies: "Niveau eau bas" },
-  { date: "2025-07-13 14:20", mode: "Solaire Adsorption", energie_kwh: 10.7, anomalies: "Aucune" },
-  { date: "2025-07-13 12:00", mode: "Solaire Adsorption", energie_kwh: 9.4, anomalies: "Aucune" },
-  { date: "2025-07-13 08:30", mode: "Compression", energie_kwh: 16.2, anomalies: "Aucune" },
-  { date: "2025-07-12 18:00", mode: "Hybride", energie_kwh: 14.9, anomalies: "Aucune" }
+  {
+    id: 1,
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    type: 'info',
+    message: 'Basculement automatique vers mode Solaire Adsorption',
+    details: 'Ensoleillement optimal détecté: 850 W/m²'
+  },
+  {
+    id: 2,
+    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+    type: 'warning',
+    message: 'Niveau d\'eau bas détecté',
+    details: 'Niveau descendu à 25%, remplissage automatique activé'
+  },
+  {
+    id: 3,
+    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+    type: 'success',
+    message: 'Maintenance préventive effectuée',
+    details: 'Contrôle des 6 potentiomètres Arduino terminé'
+  }
 ];
 
 // Fonction pour simuler la mise à jour des données en temps réel
 export const updateSystemStatus = () => {
+  // Simulation des 5 potentiomètres Arduino
+  const temperature = Math.floor(Math.random() * 6) + 22;        // Potentiomètre A4
+  const pression = (Math.random() * 0.8 + 1.6).toFixed(2);       // Potentiomètre A1 (en bar)
+  const ensoleillement = Math.floor(Math.random() * 200) + 700;  // Potentiomètre A3
+  const debit = Math.floor(Math.random() * 10) + 45;             // Potentiomètre A0
+  const niveau_eau = Math.floor(Math.random() * 20) + 70;        // Potentiomètre A2
+  
+  // Calcul intelligent de l'humidité basé sur les autres métriques
+  const calculateHumidity = (temp, sun, water) => {
+    const base_humidity = 65;
+    const temp_factor = (30 - temp) * 2;  // Plus chaud = moins humide
+    const sun_factor = (sun / 1000) * -10; // Plus de soleil = moins humide
+    const water_factor = (water - 50) * 0.3; // Plus d'eau = plus humide
+    
+    const humidity = base_humidity + temp_factor + sun_factor + water_factor;
+    return Math.max(20, Math.min(90, Math.round(humidity))); // Limiter entre 20% et 90%
+  };
+  
+  const humidity = calculateHumidity(temperature, ensoleillement, niveau_eau);
+  
   return {
     ...systemStatus,
-    ensoleillement: Math.floor(Math.random() * 200) + 700,
-    temperature: Math.floor(Math.random() * 6) + 22,
-    demande_froid: Math.floor(Math.random() * 8) + 10,
-    debit: Math.floor(Math.random() * 10) + 45,
-    pression: (Math.random() * 0.6 + 2.2).toFixed(1),
-    niveau_eau: Math.floor(Math.random() * 20) + 70,
+    temperature: temperature,
+    pression: parseFloat(pression),
+    ensoleillement: ensoleillement,
+    debit: debit,
+    niveau_eau: niveau_eau,
+    humidity: humidity, // Calculée intelligemment
     derniere_maj: new Date().toLocaleString('fr-FR')
   };
 };

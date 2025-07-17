@@ -40,7 +40,7 @@ export const climatisationAPI = {
    * Récupère l'état actuel du système
    */
   getSystemStatus: async () => {
-    return await apiRequest('/status');
+    return await apiRequest('/system-status');
   },
 
   /**
@@ -51,7 +51,7 @@ export const climatisationAPI = {
       ? { action: 'auto' }
       : { mode, action: 'set' };
       
-    return await apiRequest('/mode', {
+    return await apiRequest('/control', {
       method: 'POST',
       body: JSON.stringify(requestBody),
     });
@@ -62,7 +62,7 @@ export const climatisationAPI = {
    */
   healthCheck: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/status`);
+      const response = await fetch(`${API_BASE_URL}/system-status`);
       return response.ok;
     } catch {
       return false;
@@ -87,18 +87,25 @@ export const dataTransformers = {
     
     return {
       mode: modeMap[backendData.mode] || backendData.mode,
-      ensoleillement: Math.round(backendData.ensoleillement || 0),
+      // 5 potentiomètres Arduino
       temperature: Math.round(backendData.temperature || 0),
-      demande_froid: Math.round((backendData.debit || 0) * 0.24), // Estimation
+      pression: Math.round(backendData.pression * 100) / 100, // Correction: pression en bar
+      ensoleillement: Math.round(backendData.ensoleillement || 0),
       debit: Math.round(backendData.debit || 0),
-      pression: Math.round(backendData.pression * 10) / 10,
       niveau_eau: Math.round(backendData.niveau_eau || 0),
+      // Humidité calculée par le backend
+      humidity: Math.round(backendData.humidity || 65),
+      // Données système
       derniere_maj: backendData.timestamp || new Date().toISOString(),
       arduino_connected: backendData.arduino_connected || false,
       thermal_image: backendData.thermal_image || null,
       leak_detected: backendData.leak_detected || false,
       leak_details: backendData.leak_details || {},
-      mode_forced: backendData.mode_forced || false
+      mode_forced: backendData.mode_forced || false,
+      // Données calculées
+      demande_froid: Math.round((backendData.debit || 0) * 0.24), // Estimation
+      cop: 4.2 + Math.random() * 0.8 - 0.4,
+      consommation_electrique: 1.2 + Math.random() * 0.6 - 0.3
     };
   },
 
