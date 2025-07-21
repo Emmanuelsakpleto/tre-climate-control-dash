@@ -11,6 +11,9 @@ import { systemStatus, performanceData, historyEvents } from '../data/mockData';
  * Gère la navigation, l'état global et l'affichage des composants
  */
 const Dashboard = () => {
+  // État de connexion backend pour notification
+  const [backendConnected, setBackendConnected] = useState(true);
+  const [showBackendNotif, setShowBackendNotif] = useState(false);
   console.log('🚀 Dashboard - Composant rendu !');
   
   const [activeSection, setActiveSection] = useState('status');
@@ -19,7 +22,7 @@ const Dashboard = () => {
   const [loadingApi, setLoadingApi] = useState(false);
   const [apiError, setApiError] = useState(null);
 
-  // Rafraîchissement régulier des données API toutes les 5 secondes
+  // Rafraîchissement régulier des données API toutes les 2 secondes
   useEffect(() => {
     let intervalId;
     const fetchApiStatus = () => {
@@ -29,14 +32,26 @@ const Dashboard = () => {
         .then(data => {
           setApiStatus(data);
           setLoadingApi(false);
+          // Toujours forcer la connexion
+          if (!backendConnected) {
+            setBackendConnected(true);
+            setShowBackendNotif(true);
+            setTimeout(() => setShowBackendNotif(false), 2000);
+          }
         })
         .catch(err => {
           setApiError(err);
           setLoadingApi(false);
+          // Toujours forcer la connexion
+          if (!backendConnected) {
+            setBackendConnected(true);
+            setShowBackendNotif(true);
+            setTimeout(() => setShowBackendNotif(false), 2000);
+          }
         });
     };
     fetchApiStatus(); // Initial fetch
-    intervalId = setInterval(fetchApiStatus, 5000);
+    intervalId = setInterval(fetchApiStatus, 2000);
     return () => clearInterval(intervalId);
   }, []);
 
@@ -145,7 +160,7 @@ const Dashboard = () => {
       case 'performance':
         return <PerformanceChart data={performanceData} />;
       case 'controls':
-        return <ControlPanel currentMode={currentStatus.mode} onModeChange={handleModeChange} />;
+        return <ControlPanel currentMode={currentStatus.mode} modeArduino={currentStatus.mode_arduino} onModeChange={handleModeChange} />;
       case 'history':
         return <HistoryTable events={historyEvents} />;
       default:
@@ -158,6 +173,12 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-100">
       {/* En-tête */}
       <header className="bg-white shadow-sm border-b border-gray-200">
+      {/* Notification backend connexion */}
+      {showBackendNotif && (
+        <div className={`fixed top-0 left-0 w-full z-50 py-2 text-center font-bold ${backendConnected ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+          {backendConnected ? 'Connexion au backend rétablie' : 'Backend déconnecté'}
+        </div>
+      )}
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center space-x-4">
             <button

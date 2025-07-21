@@ -1,10 +1,11 @@
+  // Affichage du mode Arduino si présent
 import React, { useState } from 'react';
 
 /**
  * Composant ControlPanel - Panneaux de contrôle manuel du système
  * Permet de forcer les modes solaire/compression avec confirmation
  */
-const ControlPanel = ({ currentMode, onModeChange }) => {
+const ControlPanel = ({ currentMode, modeArduino, onModeChange }) => {
   // Suppression de la confirmation
   const [actionMessage, setActionMessage] = useState(null);
   const [actionError, setActionError] = useState(null);
@@ -73,11 +74,17 @@ const ControlPanel = ({ currentMode, onModeChange }) => {
       <div className="mb-6 p-5 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl">
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-sm text-gray-600 mb-1 font-medium">Mode actuel:</div>
+            <div className="text-sm text-gray-600 mb-1 font-medium">Mode actuel (backend):</div>
             <div className="text-xl font-bold text-gray-800 flex items-center gap-2">
               {currentModeObj ? currentModeObj.label : currentMode}
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
             </div>
+            {modeArduino && (
+              <div className="mt-2 text-sm text-blue-700 font-semibold flex items-center gap-2">
+                <span>Mode physique (Arduino):</span>
+                <span className="px-2 py-1 bg-blue-100 rounded-lg">{modeArduino}</span>
+              </div>
+            )}
           </div>
           <div className="text-4xl opacity-60">
             {currentModeObj ? currentModeObj.icon : '⚙️'}
