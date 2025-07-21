@@ -41,8 +41,50 @@ const Dashboard = () => {
   }, []);
 
   // Utiliser les données du backend si dispo, sinon mock
-  // Arrondir les données numériques avant affichage
-  const rawStatus = apiStatus || systemStatus;
+  // Afficher des données mock typiques selon le mode en cours
+  const getMockStatusByMode = (mode) => {
+    switch (mode?.toLowerCase()) {
+      case 'solar':
+      case 'solaire adsorption':
+        return {
+          ...systemStatus,
+          mode: 'Solaire Adsorption',
+          temperature: 36.0,
+          pression: 2.25,
+          ensoleillement: 800,
+          debit: 50,
+          niveau_eau: 80,
+          humidity: 65
+        };
+      case 'compression':
+        return {
+          ...systemStatus,
+          mode: 'Compression',
+          temperature: 22.0,
+          pression: 3.2,
+          ensoleillement: 400,
+          debit: 70,
+          niveau_eau: 90,
+          humidity: 55
+        };
+      case 'hybrid':
+        return {
+          ...systemStatus,
+          mode: 'Hybride',
+          temperature: 28.0,
+          pression: 2.7,
+          ensoleillement: 600,
+          debit: 60,
+          niveau_eau: 85,
+          humidity: 60
+        };
+      case 'automatic':
+      default:
+        return systemStatus;
+    }
+  };
+
+  const rawStatus = apiStatus || getMockStatusByMode(apiStatus?.mode || systemStatus.mode);
   const currentStatus = {
     ...rawStatus,
     temperature: rawStatus.temperature !== undefined ? Math.round(rawStatus.temperature * 10) / 10 : undefined,
