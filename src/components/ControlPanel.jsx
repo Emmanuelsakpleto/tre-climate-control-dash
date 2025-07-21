@@ -5,19 +5,48 @@ import React, { useState } from 'react';
  * Permet de forcer les modes solaire/compression avec confirmation
  */
 const ControlPanel = ({ currentMode, onModeChange }) => {
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [selectedMode, setSelectedMode] = useState('');
+  // Suppression de la confirmation
+  const [actionMessage, setActionMessage] = useState(null);
+  const [actionError, setActionError] = useState(null);
 
+  // Mapping des modes backend vers labels et icônes
   const modes = [
-    { id: 'solaire', label: 'Solaire Adsorption', color: 'bg-green-600 hover:bg-green-700', icon: '☀️' },
+    { id: 'solar', label: 'Solaire Adsorption', color: 'bg-green-600 hover:bg-green-700', icon: '☀️' },
     { id: 'compression', label: 'Compression', color: 'bg-blue-600 hover:bg-blue-700', icon: '❄️' },
-    { id: 'hybride', label: 'Hybride', color: 'bg-yellow-600 hover:bg-yellow-700', icon: '⚡' },
-    { id: 'auto', label: 'Automatique', color: 'bg-gray-600 hover:bg-gray-700', icon: '🤖' }
+    { id: 'hybrid', label: 'Hybride', color: 'bg-yellow-600 hover:bg-yellow-700', icon: '⚡' },
+    { id: 'automatic', label: 'Automatique', color: 'bg-gray-600 hover:bg-gray-700', icon: '🤖' }
   ];
 
+  // Trouver le label et l'icône du mode actuel
+  const currentModeObj = modes.find(m => m.id === currentMode?.toLowerCase());
+  // Gestion des actions rapides
+  const handleQuickAction = async (action) => {
+    setActionMessage(null);
+    setActionError(null);
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action })
+      });
+      const data = await response.json();
+      if (response.ok && data.status === 'success') {
+        setActionMessage(data.message || 'Action effectuée avec succès');
+      } else {
+        setActionError(data.error || 'Erreur lors de l\'action');
+      }
+    } catch (err) {
+      setActionError('Erreur de connexion au backend');
+    }
+    // Masquer le message après 3 secondes
+    setTimeout(() => {
+      setActionMessage(null);
+      setActionError(null);
+    }, 3000);
+  };
+
   const handleModeSelection = (mode) => {
-    setSelectedMode(mode);
-    setShowConfirmation(true);
+    onModeChange(mode);
   };
 
   const confirmModeChange = () => {
@@ -46,12 +75,12 @@ const ControlPanel = ({ currentMode, onModeChange }) => {
           <div>
             <div className="text-sm text-gray-600 mb-1 font-medium">Mode actuel:</div>
             <div className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              {currentMode}
+              {currentModeObj ? currentModeObj.label : currentMode}
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
             </div>
           </div>
           <div className="text-4xl opacity-60">
-            {modes.find(m => m.label.includes(currentMode.split(' ')[0]))?.icon || '⚙️'}
+            {currentModeObj ? currentModeObj.icon : '⚙️'}
           </div>
         </div>
       </div>
@@ -69,8 +98,8 @@ const ControlPanel = ({ currentMode, onModeChange }) => {
             <div className="text-left">
               <div className="font-bold text-lg">{mode.label}</div>
               <div className="text-xs opacity-80">
-                {mode.id === 'auto' ? 'Gestion intelligente' : 
-                 mode.id === 'solaire' ? 'Énergie renouvelable' :
+                {mode.id === 'automatic' ? 'Gestion intelligente' : 
+                 mode.id === 'solar' ? 'Énergie renouvelable' :
                  mode.id === 'compression' ? 'Performance optimale' : 'Efficacité mixte'}
               </div>
             </div>
@@ -85,11 +114,17 @@ const ControlPanel = ({ currentMode, onModeChange }) => {
           Actions Rapides
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <button className="group bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105">
+          <button
+            className="group bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105"
+            onClick={() => handleQuickAction('restart')}
+          >
             <span className="text-lg group-hover:rotate-180 transition-transform duration-300">🔄</span>
             <span className="font-medium">Redémarrer</span>
           </button>
-          <button className="group bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105">
+          <button
+            className="group bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105"
+            onClick={() => handleQuickAction('stop')}
+          >
             <span className="text-lg group-hover:animate-pulse">🛑</span>
             <span className="font-medium">Arrêt d'Urgence</span>
           </button>
@@ -102,38 +137,16 @@ const ControlPanel = ({ currentMode, onModeChange }) => {
             <span className="font-medium">Diagnostic</span>
           </button>
         </div>
+        {/* Notification d'action rapide */}
+        {(actionMessage || actionError) && (
+          <div className={`mt-4 px-4 py-2 rounded text-center font-medium ${actionMessage ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            {actionMessage || actionError}
+          </div>
+        )}
       </div>
       
       {/* Boîte de dialogue de confirmation */}
-      {showConfirmation && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              Confirmer le changement de mode
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Êtes-vous sûr de vouloir changer le mode vers{' '}
-              <span className="font-semibold">
-                {modes.find(m => m.id === selectedMode)?.label}
-              </span> ?
-            </p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={cancelModeChange}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={confirmModeChange}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-              >
-                Confirmer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Suppression de la boîte de confirmation */}
     </div>
   );
 };

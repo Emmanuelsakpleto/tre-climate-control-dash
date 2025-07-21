@@ -19,23 +19,39 @@ const Dashboard = () => {
   const [loadingApi, setLoadingApi] = useState(false);
   const [apiError, setApiError] = useState(null);
 
-  // Récupérer les données du backend à l'initialisation
+  // Rafraîchissement régulier des données API toutes les 5 secondes
   useEffect(() => {
-    setLoadingApi(true);
-    fetch('http://127.0.0.1:5000/api/status')
-      .then(res => res.json())
-      .then(data => {
-        setApiStatus(data);
-        setLoadingApi(false);
-      })
-      .catch(err => {
-        setApiError(err);
-        setLoadingApi(false);
-      });
+    let intervalId;
+    const fetchApiStatus = () => {
+      setLoadingApi(true);
+      fetch('http://127.0.0.1:5000/api/status')
+        .then(res => res.json())
+        .then(data => {
+          setApiStatus(data);
+          setLoadingApi(false);
+        })
+        .catch(err => {
+          setApiError(err);
+          setLoadingApi(false);
+        });
+    };
+    fetchApiStatus(); // Initial fetch
+    intervalId = setInterval(fetchApiStatus, 5000);
+    return () => clearInterval(intervalId);
   }, []);
 
   // Utiliser les données du backend si dispo, sinon mock
-  const currentStatus = apiStatus || systemStatus;
+  // Arrondir les données numériques avant affichage
+  const rawStatus = apiStatus || systemStatus;
+  const currentStatus = {
+    ...rawStatus,
+    temperature: rawStatus.temperature !== undefined ? Math.round(rawStatus.temperature * 10) / 10 : undefined,
+    pression: rawStatus.pression !== undefined ? Math.round(rawStatus.pression * 100) / 100 : undefined,
+    debit: rawStatus.debit !== undefined ? Math.round(rawStatus.debit) : undefined,
+    niveau_eau: rawStatus.niveau_eau !== undefined ? Math.round(rawStatus.niveau_eau) : undefined,
+    ensoleillement: rawStatus.ensoleillement !== undefined ? Math.round(rawStatus.ensoleillement) : undefined,
+    humidity: rawStatus.humidity !== undefined ? Math.round(rawStatus.humidity * 10) / 10 : undefined
+  };
 
   // Debug - Vérifier les données passées
   console.log('🔍 Dashboard - Données API systemStatus:', apiStatus);
@@ -44,8 +60,27 @@ const Dashboard = () => {
 
   const handleModeChange = async (newMode) => {
     try {
-      await controlMode(newMode);
-      console.log(`Mode changé vers: ${newMode}`);
+      // Appel API pour changer le mode
+      const response = await fetch('http://127.0.0.1:5000/api/mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: newMode })
+      });
+      const result = await response.json();
+      console.log(`Mode changé vers: ${newMode}`, result);
+      // Optionnel: mettre à jour l’état local si besoin
+      // Mettre à jour le statut système en récupérant les nouvelles données du backend
+      setLoadingApi(true);
+      fetch('http://127.0.0.1:5000/api/status')
+        .then(res => res.json())
+        .then(data => {
+          setApiStatus(data);
+          setLoadingApi(false);
+        })
+        .catch(err => {
+          setApiError(err);
+          setLoadingApi(false);
+        });
     } catch (err) {
       console.error('Erreur lors du changement de mode:', err);
     }
